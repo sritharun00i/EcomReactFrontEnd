@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Home from "./Home"
 import axios from "axios";
 // import { json } from "react-router-dom";
@@ -16,6 +16,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
   const [noResults, setNoResults] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [showSearchResults,setShowSearchResults] = useState(false)
+  const timeoutRef = useRef(null);
   useEffect(() => {
     fetchData();
   }, []);
@@ -33,7 +34,11 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
   const handleChange = async (value) => {
     setInput(value);
     if (value.length >= 1) {
-      setShowSearchResults(true)
+      setShowSearchResults(true);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     try {
       const response = await axios.get(
         `http://localhost:8080/api/products/search?keyword=${value}`
@@ -51,34 +56,18 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
     }
   };
 
-  
-  // const handleChange = async (value) => {
-  //   setInput(value);
-  //   if (value.length >= 1) {
-  //     setShowSearchResults(true);
-  //     try {
-  //       let response;
-  //       if (!isNaN(value)) {
-  //         // Input is a number, search by ID
-  //         response = await axios.get(`http://localhost:8080/api/products/search?id=${value}`);
-  //       } else {
-  //         // Input is not a number, search by keyword
-  //         response = await axios.get(`http://localhost:8080/api/products/search?keyword=${value}`);
-  //       }
+  const handleInputBlur = () => {
+    timeoutRef.current = setTimeout(() => {
+      setShowSearchResults(false);
+    }, 150);
+  };
 
-  //       const results = response.data;
-  //       setSearchResults(results);
-  //       setNoResults(results.length === 0);
-  //       console.log(results);
-  //     } catch (error) {
-  //       console.error("Error searching:", error.response ? error.response.data : error.message);
-  //     }
-  //   } else {
-  //     setShowSearchResults(false);
-  //     setSearchResults([]);
-  //     setNoResults(false);
-  //   }
-  // };
+  const handleResultsMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -107,9 +96,10 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
       <header>
         <nav className="navbar navbar-expand-lg fixed-top">
           <div className="container-fluid">
-            <a className="navbar-brand" href="https://telusko.com/">
-              Telusko
+            <a className="navbar-brand" href="https://github.com/sritharun00i">
+              Meet Dev
             </a>
+
             <button
               className="navbar-toggler"
               type="button"
@@ -189,10 +179,10 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                   value={input}
                   onChange={(e) => handleChange(e.target.value)}
                   onFocus={() => setSearchFocused(true)} // Set searchFocused to true when search bar is focused
-                  onBlur={() => setSearchFocused(false)} // Set searchFocused to false when search bar loses focus
+                  onBlur={handleInputBlur} // Set searchFocused to false when search bar loses focus
                 />
                 {showSearchResults && (
-                  <ul className="list-group">
+                  <ul className="list-group" onMouseEnter={handleResultsMouseEnter}>
                     {searchResults.length > 0 ? (  
                         searchResults.map((result) => (
                           <li key={result.id} className="list-group-item">
@@ -204,7 +194,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                     ) : (
                       noResults && (
                         <p className="no-results-message">
-                          No Prouduct with such Name
+                          No Product with such Name
                         </p>
                       )
                     )}
