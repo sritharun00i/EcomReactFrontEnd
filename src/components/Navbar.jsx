@@ -90,6 +90,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
     "Electronics",
     "Toys",
     "Fashion",
+    "Cars",
   ];
   return (
     <>
