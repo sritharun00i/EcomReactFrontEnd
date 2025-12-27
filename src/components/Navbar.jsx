@@ -1,10 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import Home from "./Home"
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import AppContext from "../Context/Context";
 // import { json } from "react-router-dom";
 // import { BiSunFill, BiMoon } from "react-icons/bi";
 
 const Navbar = ({ onSelectCategory, onSearch }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useContext(AppContext);
   const getInitialTheme = () => {
     const storedTheme = localStorage.getItem("theme");
     return storedTheme ? storedTheme : "light-theme";
@@ -73,6 +77,12 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
     setSelectedCategory(category);
     onSelectCategory(category);
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const toggleTheme = () => {
     const newTheme = theme === "dark-theme" ? "light-theme" : "dark-theme";
     setTheme(newTheme);
@@ -163,6 +173,27 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                 )}
               </button>
               <div className="d-flex align-items-center cart">
+                {!isAuthenticated ? (
+                  <>
+                    <Link to="/login" className="nav-link text-dark me-2">
+                      <button className="btn btn-outline-primary btn-sm">
+                        Login
+                      </button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <span className="nav-link text-dark me-2">
+                      Welcome, {user?.name || user?.email}
+                    </span>
+                    <button 
+                      className="btn btn-outline-danger btn-sm me-2"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </button>
+                  </>
+                )}
                 <a href="/cart" className="nav-link text-dark">
                   <i
                     className="bi bi-cart me-2"

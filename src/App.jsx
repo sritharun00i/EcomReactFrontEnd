@@ -1,21 +1,29 @@
 import "./App.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Cart from "./components/Cart";
 import AddProduct from "./components/AddProduct";
 import Product from "./components/Product";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./components/Login";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider } from "./Context/Context";
+import AppContext from "./Context/Context";
 import UpdateProduct from "./components/UpdateProduct";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+// Protected Route Component
+const ProtectedRoute = ({ children, isAuthenticated }) => {
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
 
 function App() {
   const [cart, setCart] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const { isAuthenticated } = useContext(AppContext);
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -42,6 +50,7 @@ function App() {
         <Navbar onSelectCategory={handleCategorySelect}
          />
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route
             path="/"
             element={
@@ -49,11 +58,11 @@ function App() {
               />
             }
           />
-          <Route path="/add_product" element={<AddProduct />} />
+          <Route path="/add_product" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AddProduct /></ProtectedRoute>} />
           <Route path="/product" element={<Product  />} />
           <Route path="product/:id" element={<Product  />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/product/update/:id" element={<UpdateProduct />} />
+          <Route path="/cart" element={<ProtectedRoute isAuthenticated={isAuthenticated}><Cart /></ProtectedRoute>} />
+          <Route path="/product/update/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><UpdateProduct /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

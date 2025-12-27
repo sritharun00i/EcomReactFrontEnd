@@ -8,14 +8,34 @@ const AppContext = createContext({
   addToCart: (product) => {},
   removeFromCart: (productId) => {},
   refreshData:() =>{},
-  updateStockQuantity: (productId, newQuantity) =>{}
-  
+  updateStockQuantity: (productId, newQuantity) =>{},
+  user: null,
+  isAuthenticated: false,
+  login: (user, token) => {},
+  logout: () => {},
+  loading: false
 });
 
 export const AppProvider = ({ children }) => {
   const [data, setData] = useState([]);
   const [isError, setIsError] = useState("");
   const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cart')) || []);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('authToken'));
+  const [loading, setLoading] = useState(false);
+
+  // Check if user is still authenticated on mount
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('user');
+    if (token && storedUser) {
+      setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
 
   const addToCart = (product) => {
@@ -55,6 +75,22 @@ export const AppProvider = ({ children }) => {
   const clearCart =() =>{
     setCart([]);
   }
+
+  const login = (userData, token) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setCart([]); // Clear cart on logout
+    localStorage.removeItem('cart');
+  };
   
   useEffect(() => {
     refreshData();
@@ -65,7 +101,7 @@ export const AppProvider = ({ children }) => {
   }, [cart]);
   
   return (
-    <AppContext.Provider value={{ data, isError, cart, addToCart, removeFromCart,refreshData, clearCart  }}>
+    <AppContext.Provider value={{ data, isError, cart, addToCart, removeFromCart, refreshData, clearCart, user, isAuthenticated, login, logout, loading }}>
       {children}
     </AppContext.Provider>
   );
