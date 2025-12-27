@@ -155,6 +155,10 @@
   color: #9db8ff;
 }
 
+.dark-theme .login-card .text-center {
+  color: #667eea;
+}
+
 .dark-theme .alert {
   margin-bottom: 20px;
   border-radius: 5px;
