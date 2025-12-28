@@ -183,7 +183,7 @@ const Navbar = ({ onSelectCategory, onSearch }) => {
                   </>
                 ) : (
                   <>
-                    <span className="nav-link text-dark me-2">
+                    <span className="nav-link me-2" style={{ color: 'var(--link_color)' }}>
                       Welcome, {user?.name || user?.email}
                     </span>
                     <button 
